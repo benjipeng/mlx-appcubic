@@ -204,13 +204,14 @@ void steel_matmul_regular_axpby_nax(
   int bm = 128, bn = 128, bk = 512;
   int wm = 4, wn = 4;
 
-  // Temp routing for larger devices
+  // Temp routing for larger devices (small-M only)
   char devc = d.get_architecture().back();
   if (devc == 's' || devc == 'c' || devc == 'd') {
-    bk = (K >= 8192 && K > (M + N)) ? 64 : 256;
-
-    bm = 64;
-    wm = 2;
+    if (M < 128) {
+      bk = (K >= 8192 && K > (M + N)) ? 64 : 256;
+      bm = 64;
+      wm = 2;
+    }
   }
 
   // Prepare kernel name
